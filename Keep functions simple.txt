@@ -1,0 +1,40 @@
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Break your program into short, focused methods that each do one identifiable task (separation of concerns).
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+The result is simpler, clearer code—even in very complex systems—and makes understanding, debugging, and maintaining enterprise applications much easier.
+
+The ancient maxim "divide et impera" proved a potent tool for emperors seeking to maintain control over vast and often disparate territories.
+By strategically fostering divisions among potentially powerful factions, be it through playing on existing rivalries or creating new ones, emperors could prevent unified opposition
+	from forming, thus weakening any threats to their authority and ensuring their continued rule.
+This principle of breaking down large, complex entities into smaller, more manageable parts finds a compelling parallel in programming.
+The "divide and conquer" paradigm in software involves breaking down a large, intricate problem into smaller, independent subproblems that are easier to solve individually.
+Once these smaller solutions are obtained, they are combined to solve the original, more complex problem.
+This approach not only simplifies the development process but also often leads to more efficient and maintainable code.
+
+A BIG PROGRAM SHOULD ALWAYS BE WRITTEN IN SMALL PIECES
+
+If your executable sections stretch across hundreds of lines—with a loop starting on page 2 and ending on page 6—it becomes nearly impossible to follow the function's logic and see the full picture of what’s going on.
+
+So even if an overgrown fragment of a function is executed only once, extract it into its own function—don’t wait for it to be reused in more than one place
+(though reuse is a good reason too—see https://github.com/Ursego/ElegantProgrammingClub/blob/main/Avoid%20code%20duplication.cs).
+
+KEEP ALL OF THE OPERATIONS IN A METHOD AT THE SAME LEVEL OF ABSTRACTION
+
+This will naturally result in programs with many small methods.
+Programming is all about managing complexity, and short one-purpose functions make it easier to do that.
+
+The more lines in a method, the harder it is to understand what it does, so it’s very difficult to grasp the logic behind one massive, tangled, toilet-paper-long method.
+To figure out what’s going on, a developer is forced to read a messy mix of code—all jumbled together, even though the logic clearly belongs to different abstraction levels.
+
+THE STEP-WISE REFINEMENT (AKA "TOP-DOWN DECOMPOSITION") PRINCIPLE
+
+It's simple: don’t dive into all the details immediately!
+Instead, start with a the top-level ("main") function. It should resemble the table of contents of the book, not its main text.
+That main function should call clearly named sub-functions, which can themselves call sub-sub-functions, and so on.
+This hierarchy lets developers "travel" up and down through abstraction levels, always focusing on just one level at a time.
+The result is that at any given level of refinement, you can fully understand the logic at that level without being overwhelmed.
+
+To get a general idea of what’s going on, it’s usually enough to look at the top-level function.
+You’ll dig into the sub-functions only if absolutely necessary—and in most cases, you won’t need to if the sub-functions have quality names.
+So why clutter your view with code that’s rarely needed to be investigated, especially if it hides the "big picture"?
