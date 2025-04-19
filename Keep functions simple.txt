@@ -14,27 +14,32 @@ This approach not only simplifies the development process but also often leads t
 
 A BIG PROGRAM SHOULD ALWAYS BE WRITTEN IN SMALL PIECES
 
-If your executable sections stretch across hundreds of lines—with a loop starting on page 2 and ending on page 6—it becomes nearly impossible to follow the function's logic and see the full picture of what’s going on.
+If your executable sections stretch across hundreds of lines—with a loop starting on page 2 and ending on page 6—it becomes nearly impossible to follow the function's logic.
+The full picture of what the function is doing gets buried under a pile of numerous low-level details.
 
 So even if an overgrown fragment of a function is executed only once, extract it into its own function—don’t wait for it to be reused in more than one place
-(though reuse is a good reason too—see https://github.com/Ursego/ElegantProgrammingClub/blob/main/Avoid%20code%20duplication.cs).
+(though potential reuse is a good reason too—see https://github.com/Ursego/ElegantProgrammingClub/blob/main/Avoid%20code%20duplication.cs).
 
 KEEP ALL OF THE OPERATIONS IN A METHOD AT THE SAME LEVEL OF ABSTRACTION
 
 This will naturally result in programs with many small methods.
-Programming is all about managing complexity, and short one-purpose functions make it easier to do that.
+Programming is all about managing complexity, and short, single-purpose functions help achieve that
+Mixing different levels of abstraction within a function, on the other hand, always leads to confusion.
 
 The more lines in a method, the harder it is to understand what it does, so it’s very difficult to grasp the logic behind one massive, tangled, toilet-paper-long method.
-To figure out what’s going on, a developer is forced to read a messy mix of code—all jumbled together, even though the logic clearly belongs to different abstraction levels.
+To figure out what’s going on, readers are forced to deal with a messy mix of code—all jumbled together, even though the logic clearly belongs to different abstraction levels.
+Readers may struggle to tell whether a specific expression represents a core concept or just a low-level detail.
+Even worse, once details are mixed with essential logic, more and more details tend to accumulate in the function over time.
 
 THE STEP-WISE REFINEMENT (AKA "TOP-DOWN DECOMPOSITION") PRINCIPLE
 
-It's simple: don’t dive into all the details immediately!
-Instead, start with a the top-level ("main") function. It should resemble the table of contents of the book, not its main text.
-That main function should call clearly named sub-functions, which can themselves call sub-sub-functions, and so on.
-This hierarchy lets developers "travel" up and down through abstraction levels, always focusing on just one level at a time.
-The result is that at any given level of refinement, you can fully understand the logic at that level without being overwhelmed.
+Instead of diving into all the details immediately, we want the code to read like a top-down narrative.
+Start with the top-level ("main") function. It should resemble the table of contents of the book, not its main text.
+That top-level function should call clearly named sub-functions, which can themselves call sub-sub-functions representing the next levels of abstraction, and so on.
 
-To get a general idea of what’s going on, it’s usually enough to look at the top-level function.
+This hierarchy lets developers read the program, descending one level of abstraction at a time and always focusing on just it.
+The result is that at any given level of refinement, you can fully understand its logic without being overwhelmed.
+
+To get a general idea of the functionality, it’s usually enough to look at the top-level function.
 You’ll dig into the sub-functions only if absolutely necessary—and in most cases, you won’t need to if the sub-functions have quality names.
 So why clutter your view with code that’s rarely needed to be investigated, especially if it hides the "big picture"?
