@@ -105,7 +105,7 @@ SELECT order_id,
        5 AS discount_percentage
   FROM orders
  WHERE order_date > ADD_MONTHS(SYSDATE, -3)
-   AND order_total < 100
+   AND order_total BETWEEN 50 AND 99.99
 
 UNION ALL
 
@@ -116,7 +116,7 @@ SELECT order_id,
        10 AS discount_percentage
   FROM orders
  WHERE order_date > ADD_MONTHS(SYSDATE, -3)
-   AND order_total BETWEEN 100 AND 1000
+   AND order_total BETWEEN 100 AND 299.99
 
 UNION ALL
 
@@ -127,9 +127,9 @@ SELECT order_id,
        15 AS discount_percentage
   FROM orders
  WHERE order_date > ADD_MONTHS(SYSDATE, -3)
-   AND order_total > 1000;
+   AND order_total >= 300;
 
-// This is pure idiocy, because a single query with a simple CHOOSE CASE expression would do the work!
+// This is not an elegant solution, because a single query with a simple CHOOSE CASE expression would do the same work!
 
 // *** GOOD code: ***
 
@@ -139,11 +139,12 @@ SELECT order_id,
        order_total,
        CASE 
           WHEN order_total < 100 THEN 5
-          WHEN order_total BETWEEN 100 AND 1000 THEN 10
-          ELSE 15
+          WHEN order_total >= 300 THEN 15
+          ELSE 10
        END AS discount_percentage
   FROM orders
- WHERE order_date > ADD_MONTHS(SYSDATE, -3);
+ WHERE order_date > ADD_MONTHS(SYSDATE, -3)
+   AND order_total >= 50;
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
