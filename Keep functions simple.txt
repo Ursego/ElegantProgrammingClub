@@ -1,6 +1,6 @@
-// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Break your program into short, focused methods that each do one identifiable task (separation of concerns).
-// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Break your program into short, focused methods that each do one identifiable task (separation of concerns).
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 The result is simpler, clearer code—even in very complex systems—and makes understanding, debugging, and maintaining enterprise applications much easier.
 
@@ -19,6 +19,28 @@ The full picture of what the function is doing gets buried under a pile of numer
 
 So even if an overgrown fragment of a function is executed only once, extract it into its own function—don’t wait for it to be reused in more than one place
 (though potential reuse is a good reason too—see https://github.com/Ursego/ElegantProgrammingClub/blob/main/Avoid%20code%20duplication.cs).
+
+CODE BLOCKS WITHIN A METHOD MUST BE SHORT
+
+A code block is a fragment enclosed between opening and closing operators. These can be:
+
+1. Special block delimiters, like curly braces in C-like languages or BEGIN...END in PL/SQL and Transact-SQL.
+2. Conditional constructs, like IF...END IF. 
+3. Looping operators, like FOR...NEXT, LOOP...END LOOP, DO...WHILE.
+
+The rule is simple:
+Keep the operators that open and close a block visible on the same screen. If that’s not possible, refactor the block into a new function, preferrably with the operators.
+
+This approach also helps reduce indentation (https://github.com/Ursego/ElegantProgrammingClub/blob/main/Avoid%20over-indentation.cs). For example, the fragment:
+
+if ([condition]) {
+   [very long code fragment with its own indentation]
+}
+
+will be looking in the new function as
+
+if (![condition]) return;
+[very long code fragment with its own indentation]
 
 KEEP ALL OF THE OPERATIONS IN A METHOD AT THE SAME LEVEL OF ABSTRACTION
 
@@ -75,15 +97,95 @@ Bad code has an ambiguous purpose. Its role is unclear.
 Clean code has obvious intention and responsibility. It interacts with other parts in a straightforward way. All that makes it hard for bugs to hide.
 We must make not only the interfaces of our code easy to understand, but also apply the same principle to the implementation itself.
 That’s how we keep systems maintainable over time—with clean, simple, testable code that allows us to move fast, not just today but throughout the system’s entire lifetime.
-Otherwise, a future maintainer might rewrite that code without realizing it's not semantically equivalent, which will create bugs.
+Otherwise, a future maintainer might rewrite that code without realizing the new version is not semantically equivalent.
 Clear intent is especially crucial in the presence of complex conditions, tricky logic, advanced algorithms or data structures, and less common language features.
 
 NO MATTER HOW COMPLEX THE OVERALL SYSTEM MAY BE, THE INDIVIDUAL COMPONENTS MUST STAY SIMPLE.
 
 There's this prevailing idea that complex problems call for complex solutions.
 Programmers often tell themselves that they were solving a hard problem—so maybe the code should be hard to read. Which is a synonym for "ugly".
-In any case, I have encountered this phenomenon many times over the decades of my career.
+I have encountered this phenomenon many times over the decades of my career.
 
 But the truth is the opposite: the harder the problem, the more important it is to keep the solution simple.
 Even if the problem itself is complex, there’s always a way to break it down into subproblems of manageable complexity.
-There’s always an interface that can sit on top of that complexity, allowing the reader to ignore it in most cases.
+There’s always an interface that can sit on top of the complexity, allowing the reader to ignore that complexity in most cases.
+
+WHAT SHOULD BE THE MAXIMUM FUNCTION LENGTH?
+
+No philosophical question has a mathematically precise answer, and our question is no exception.
+Still, there are a few widely accepted ideas on the topic. The universal principle is: the shorter, the better.
+Here is my opinion:
+Ideally, a function should fit within one screen (only the logic, i.e. not counting the header comment, the parameters validation fragment and the variables declaration section).
+Two screens are still acceptable, but once a function stretches to three screens, it's a clear sign of poor structure.
+
+This is roughly consistent with what is written in the book "Code Complete":
+
+"A large percentage of routines in object-oriented programs will be accessor routines, which will be very short.
+From time to time, a complex algorithm will lead to a longer routine, and in those circumstances, the routine should be allowed to grow organically up to 100-200 lines.
+Let issues such as the routine's cohesion, depth of nesting, number of variables, number of decision points, number of comments needed to explain the routine,
+and other complexity-related considerations dictate the length of the routine rather than imposing a length restriction per se.
+That said, if you want to write routines longer than about 200 lines, be careful.
+None of the studies that reported decreased cost, decreased error rates, or both with larger routines distinguished among sizes larger than 200 lines,
+and you're bound to run into an upper limit of understandability as you pass 200 lines of code."
+
+And some books are much more strict. They sound nice, but that is unrealistic in real enterprise applications:
+
+From "Clean Code":
+
+"Functions should not be 100 lines long. Functions should hardly ever be 20 lines long.
+How short should a function be? In 1999 I went to visit Kent Beck at his home in Oregon. We sat down and did some programming together.
+At one point he showed me a cute little Java/Swing program ...
+Every function in this program was just two, or three, or four lines long. Each was transparently obvious. Each told a story.
+And each led you to the next in a compelling order. That's how short your functions should be!"
+
+From "97 Things Every Programmer Should Know":
+
+"Make your functions short and focused on a single task. The old 24-line limit still applies.
+Although screen size and resolution have changed, nothing has changed in human cognition since the 1960s."
+
+If I haven't bored you with my writing yet, read the opinions of various programmers I encountered in the comments on the Internet:
+
+"When reading code for a single function, you should be able to remember (mostly) what it is doing from beginning to the end.
+If you get partway through a function and start thinking "what was this function supposed to be doing again?" then that's a sure sign that it's too long..."
+
+"Usually if it can't fit on my screen, it's a candidate for refactoring. But, screensize does vary, so I usually look for under 25-30 lines."
+
+"IMO you should worry about keeping your methods short and having them do one "thing" equally.
+I have seen a lot of cases where a method does "one" thing that requires extremely verbose code - generating an XML document, for example,
+and it's not an excuse for letting the method grow extremely long."
+
+"You should make functions as small as you can make them, as long as they remain discrete sensible operations in your domain.
+If you break a function ab() up into a() and b() and it would NEVER make sense to call a() without immediately calling b() afterwards, you haven't gained much.
+Perhaps it's easier to test or refactor, you might argue, but if it really never makes sense to call a() without b(), then the more valuable test is a() followed by b().
+Make them as simple and short as they can be, but no simpler!"
+
+"As a rule of thumb, any method that does not fit on your screen is in dire need of refactoring - you should be able to grasp what a method is doing without having to scroll.
+Remember that you spend much more time reading code than writing it.
+~20 lines is a reasonable maximum, though.
+Aside from method length, you should watch out for cyclomatic complexity i.e. the number of different paths that can be followed inside the method.
+Reducing cyclomatic complexity is as important as reducing method length (because a high CC reveals a method that is difficult to test, debug and understand)."
+
+"During my first years of study, we had to write methods/functions with no more than 25 lines.
+Nowadays I'm free to code the way I want but I think being forced to code that way was a good thing.
+By writing small methods/functions, you more easily divide your code into reusable components, it's easier to test, and it's easier to maintain."
+
+"I often end up writing C# methods with 10 - 30 lines. Sometimes I find longer methods suitable, when it’s easier to read/test/maintain."
+
+"My problem with big functions is that I want to hold everything that's happening in the code, in my head all at once.
+That's really the key. It also means that we're talking about a moving target.
+Dense perl should appear in shorter chunks than padded VB.
+And, worse, at only 38, I'm finding that while my abilities have matured in nice ways, by core ability to grok a bunch of code is diminishing
+and thus the size of code blocks I want to handle is shrinking.
+Because the goal is usability, the one screen rule really does make sense even though you can point to seeming flaws like varying screen resolutions. If you can see it all at once without paging around the editor, you are very much more likely to handle it all as a block.
+What if you're working on a team? I suppose the best thing for the team would be to determine the lowest common denominator and target that size.
+If you have someone with a short attention-span or an IDE set up displaying around 20 lines, that's probably a good target. Another team might be good with 50.
+And yeah, whatever your target is, sometimes you'll go over. 40 lines instead of 25 when the function can't really be broken up reasonably is fine here and there.
+You and your partners will deal with it. But the 3K line single-function VB6 modules that exist in some of my employer's legacy suites are insane!"
+
+
+I hope you found this article interesting and useful.
+But the number of lines in it is approaching two hundred.
+This is absolutely unacceptable, I must stop writing right now!!!
+
+
+
