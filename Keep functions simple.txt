@@ -43,3 +43,40 @@ The result is that at any given level of refinement, you can fully understand it
 To get a general idea of the functionality, it’s usually enough to look at the top-level function.
 You’ll dig into the sub-functions only if absolutely necessary—and in most cases, you won’t need to if the sub-functions have quality names.
 So why clutter your view with code that’s rarely needed to be investigated, especially if it hides the "big picture"?
+
+ONE (<- !!!) IDENTIFIABLE TASK
+
+When we say that each method should perform one identifiable task, focus on the word "one."
+
+The next time you're tempted to group multiple actions into a single method, remember that the English language doesn’t have a word like MakeUpYourRoomBeQuietAndDoYourHomeWork,
+even though that would be convenient for something often said.
+
+If you need to perform three different actions, write three separate methods.
+That way, you’ll already have the pieces ready if you—or another developer—need to call just one of them later. The smaller the LEGO bricks, the more flexibility you have. 
+
+On the other hand, if you write one method that does too much, you'll eventually face a "siamese twin separation surgery"—refactoring part of that method into a new one.
+That also means you’ll need extra regression testing to make sure nothing breaks for the existing consumers of your (former) all-in-one method.
+
+I once did exactly that. But my manager told me to roll everything back—we can't touch other, well-functioning flows. He told me to just copy/paste the needed fragment.
+<sarcasm>Good management is the key to a successful project!</sarcasm>
+
+Bad code tries to do too much. Clean code stays focused and does one thing well. It reflects a single purpose, undistracted and unpolluted by unrelated surrounding details.
+It’s no coincidence that many software design principles can be summed up by this simple rule.
+
+BUT WHAT DOES “ONE TASK” ACTUALLY MEAN?
+
+If a function performs only those steps that are one level below the function’s name, then it’s doing one task.
+After all, we write functions to break down a larger concept—the function’s name—into smaller steps at the next level of abstraction.
+
+Another way to tell if a function is doing more than one task is if you can extract a new function from it and give that new function a name that’s not just a restatement
+of the original implementation.
+
+ONE IDENTIFIABLE (<- !!!) TASK
+
+The purpose, intention and responsibility of the code must be obvious. Dependencies should be minimal.
+Future maintainers may need to modify the code due to changing requirements or bug fixes, so don't mislead them.
+We must make not only the interfaces of our code easy to understand, but also apply the same principle to the implementation itself.
+Otherwise, a future maintainer might rewrite that code without realizing it's not semantically equivalent, which will create bugs.
+Clear intent is especially crucial in the presence of complex conditions, tricky logic, advanced algorithms or data structures, and less common language features.
+
+Bad code has an ambiguous purpose. Clean code is straightforward to make it hard for bugs to hide.
