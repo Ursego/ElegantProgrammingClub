@@ -58,33 +58,33 @@ let errorMessageToUser = "First line " +
 // This makes the structure harder to understand.
 // The example is simple, but in real-world code, the number of conditions can be much greater, and each block may be long, with its own indentation levels.
 
-if <condition 1> then
-    [code fragment 1]
-else
-    if <condition 2> then
-        [code fragment 2]
-    else
-        if <condition 3> then
-            [code fragment 3]
-        else
-            [code fragment 4]
-        end if
-    end if
-end if
+if (condition1) {
+    // code fragment 1
+} else {
+    if (condition2) {
+        // code fragment 2
+    } else {
+        if (condition3) {
+            // code fragment 3
+        } else {
+            // code fragment 4
+        }
+    }
+}
 
 // The indentation, while clearly consistent, doesn’t help.
 // By removing unnecessary grouping and indenting to reflect that the block is essentially a single if structure, everything becomes much clearer.
 // Now the fragments that are logically on the same level of nesting also share the same indentation level:
 
-if <condition 1> then
-    [code fragment 1]
-elseif <condition 2> then
-    [code fragment 2]
-elseif <condition 3> then
-    [code fragment 3]
-else
-    [code fragment 4]
-end if
+if (condition1) {
+    // code fragment 1
+} else if (condition2) {
+    // code fragment 2
+} else if (condition3) {
+    // code fragment 3
+} else {
+    // code fragment 4
+}
 
 // Now it's clear that one, and only one, case will be executed. Reading from top to bottom until the matching condition is found shows exactly which one.
 
@@ -96,11 +96,11 @@ end if
 
 // *** BAD code: ***
 
-while ([loop condition]) {
-    if ([condition 1])  {
-        if ([condition 2]) {
-            if [condition 3]) {
-                [code fragment with its own indenting levels]
+while (loop condition) {
+    if (condition1) {
+        if (condition2) {
+            if (condition3) {
+                // code fragment with its own indenting levels
             }
         }
     }
@@ -108,11 +108,11 @@ while ([loop condition]) {
 
 // *** GOOD code: ***
 
-while ([loop condition]) {
-    if (![condition 1]) continue;
-    if (![condition 2]) continue;
-    if (![condition 3]) continue;
-    [code fragment with its own indenting levels]
+while (loopCondition) {
+    if (!condition1) continue;
+    if (!condition2) continue;
+    if (!condition3) continue;
+    // code fragment with its own indenting levels
 }
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,35 +124,36 @@ while ([loop condition]) {
 
 // *** BAD code: ***
 
-private void method1 () {
-    [code fragment A]
+private method1(): void {
+    // code fragment A
 
     if (this.dataOk1()) {
         if (this.dataOk2()) {
             if (this.dataOk3()) {
-                [code fragment with its own indents]
+                // code fragment with its own indents
             }
+        }
     }
 
-    [code fragment B]
+    // code fragment B
 }
 
 // *** GOOD code: ***
 
-private void method2 () {
-   if (!this.dataOk1()) return;
-   if (!this.dataOk2()) return;
-   if (!this.dataOk3()) return;
+private method2(): void {
+    if (!this.dataOk1()) return;
+    if (!this.dataOk2()) return;
+    if (!this.dataOk3()) return;
 
-   [code fragment with its own indents]
+    // code fragment with its own indents
 }
 
-private void method1 () {
-   [code fragment A]
+private method1(): void {
+    // code fragment A
 
-   this.method2();
+    this.method2();
 
-   [code fragment B]
+    // code fragment B
 }
 
 // This not only reduces unnecessary indentation, but also clearly communicates the intent:
@@ -163,20 +164,20 @@ private void method1 () {
 // I agree with Edsger W. Dijkstra, who was strongly against the single exit concept.
 // It might help with debugging in some cases, but why should I deal with more complex code every day just to make future debugging—if it even happens—a bit easier?
 
-// What if a code block runs after several validations, like in the previous example, but you don’t want to refactor it into a new function since it’s short and doesn’t deserve one?
+// What if a code block runs after several validations, like in the previous example, but you don’t want to refactor it into a new function since it’s short?
 // Just use a Boolean flag to control the logic locally:
 
 // *** Another GOOD code: ***
 
-private void method1 () {
-    [code fragment A]
+private method1(): void {
+   // code fragment A
 
-    Boolean ok = this.dataOk1();
-    if (ok) ok = this.dataOk2();
-    if (ok) ok = this.dataOk3();
-    if (ok) {
-        [code fragment with its own indents]
-    }
+   let ok: boolean = this.dataOk1();
+   if (ok) ok = this.dataOk2();
+   if (ok) ok = this.dataOk3();
+   if (ok) {
+       // code fragment with its own indents
+   }
 
-    [code fragment B]
+   // code fragment B
 }
