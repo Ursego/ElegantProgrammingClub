@@ -90,6 +90,37 @@ SET @brok_dtl = CASE WHEN @lang = 'FR' THEN 'Courtier: ' ELSE 'Broker: ' END
 // 3. Using an instance variable.
 //      If the original duplicated fragments were in classes that inherit from the same superclass, create the instance variable in the superclass as `protected`.
 
+// For example, we have two TypeScript functions (I realize this example is extremely idiotic, but it demonstrates the idea well):
+
+function changeCaseToUpper(input: string): string {
+  alert("Going to make it upper...");
+  const transformed = input.toUpperCase();
+  alert("Made it upper!");
+  return transformed;
+}
+
+function changeCaseToLower(input: string): string {
+  alert("Going to make it lower...");
+  const transformed = input.toLowerCase();
+  alert("Made it lower!");
+  return transformed;
+}
+
+// We strain our intellect a little and give birth to a new generic function:
+
+type CaseType = "upper" | "lower";
+
+function changeCase(input: string, caseType: CaseType): string {
+  alert(`Going to make it ${caseType}...`);
+  const transformed = (caseType === "upper") ? input.toUpperCase() : input.toLowerCase();
+  alert(`Made it ${caseType}!`);
+  return transformed;
+}
+
+// Example usage with alert:
+alert(changeCase("hello", "upper"));
+alert(changeCase("WORLD", "lower"));
+
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Use CHOOSE CASE to avoid duplication od SQL queries
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +138,7 @@ SELECT order_id,
  WHERE order_date > ADD_MONTHS(SYSDATE, -3)
    AND order_total BETWEEN 50 AND 99.99
 
-UNION ALL
+UNION
 
 SELECT order_id,
        customer_id,
@@ -118,7 +149,7 @@ SELECT order_id,
  WHERE order_date > ADD_MONTHS(SYSDATE, -3)
    AND order_total BETWEEN 100 AND 299.99
 
-UNION ALL
+UNION
 
 SELECT order_id,
        customer_id,
