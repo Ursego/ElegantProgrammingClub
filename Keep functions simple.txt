@@ -14,7 +14,7 @@ This approach not only simplifies the development process but also often leads t
 
 A BIG PROGRAM SHOULD ALWAYS BE WRITTEN IN SMALL PIECES
 
-If your executable sections stretch across hundreds of lines—with a loop starting on page 2 and ending on page 6—it becomes nearly impossible to follow the function's logic.
+If your function stretches across hundreds of lines—with a loop starting on page 2 and ending on page 6—it becomes nearly impossible to follow the function's logic.
 The full picture of what the function is doing gets buried under a pile of numerous low-level details.
 
 So even if an overgrown fragment of a function is executed only once, extract it into its own function—don’t wait for it to be reused in more than one place
@@ -46,15 +46,13 @@ So why clutter your view with code that’s rarely needed to be investigated, es
 
 ONE (<- !!!) IDENTIFIABLE TASK
 
-When we say that each method should perform one identifiable task, focus on the word "one."
-
 The next time you're tempted to group multiple actions into a single method, remember that the English language doesn’t have a word like MakeUpYourRoomBeQuietAndDoYourHomeWork,
 even though that would be convenient for something often said.
 
 If you need to perform three different actions, write three separate methods.
 That way, you’ll already have the pieces ready if you—or another developer—need to call just one of them later. The smaller the LEGO bricks, the more flexibility you have. 
 
-On the other hand, if you write one method that does too much, you'll eventually face a "siamese twin separation surgery"—refactoring part of that method into a new one.
+On the other hand, if you write one method that does too much, you'll eventually face a "siamese twins separation surgery"—refactoring part of that method into a new one.
 That also means you’ll need extra regression testing to make sure nothing breaks for the existing consumers of your (former) all-in-one method.
 
 I once did exactly that. But my manager told me to roll everything back—we can't touch other, well-functioning flows. He told me to just copy/paste the needed fragment.
@@ -73,10 +71,19 @@ of the original implementation.
 
 ONE IDENTIFIABLE (<- !!!) TASK
 
-The purpose, intention and responsibility of the code must be obvious. Dependencies should be minimal.
-Future maintainers may need to modify the code due to changing requirements or bug fixes, so don't mislead them.
+Bad code has an ambiguous purpose. Its role is unclear.
+Clean code has obvious intention and responsibility. It interacts with other parts in a straightforward way. All that makes it hard for bugs to hide.
 We must make not only the interfaces of our code easy to understand, but also apply the same principle to the implementation itself.
+That’s how we keep systems maintainable over time—with clean, simple, testable code that allows us to move fast, not just today but throughout the system’s entire lifetime.
 Otherwise, a future maintainer might rewrite that code without realizing it's not semantically equivalent, which will create bugs.
 Clear intent is especially crucial in the presence of complex conditions, tricky logic, advanced algorithms or data structures, and less common language features.
 
-Bad code has an ambiguous purpose. Clean code is straightforward to make it hard for bugs to hide.
+NO MATTER HOW COMPLEX THE OVERALL SYSTEM MAY BE, THE INDIVIDUAL COMPONENTS MUST STAY SIMPLE.
+
+There's this prevailing idea that complex problems call for complex solutions.
+Programmers often tell themselves that they were solving a hard problem—so maybe the code should be hard to read. Which is a synonym for "ugly".
+In any case, I have encountered this phenomenon many times over the decades of my career.
+
+But the truth is the opposite: the harder the problem, the more important it is to keep the solution simple.
+Even if the problem itself is complex, there’s always a way to break it down into subproblems of manageable complexity.
+There’s always an interface that can sit on top of that complexity, allowing the reader to ignore it in most cases.
