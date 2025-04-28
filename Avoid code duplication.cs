@@ -37,25 +37,6 @@
 // Here, we're applying the same concept normalizing the program code rather than data.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Avoid code duplication when comparing a value against multiple values.
-// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// PL/SQL:
-// Instead of
-IF v_mon = 'DEC' OR v_mon = 'JAN' OR v_mon = 'FEB' THEN
-// write
-IF v_mon IN ('DEC', 'JAN', 'FEB') THEN
-
-// JavaScript & TypeScript:
-// Instead of
-if (mon == 'DEC' || mon == 'JAN' || mon == 'FEB' || ) {
-// write
-if (['DEC', 'JAN', 'FEB'].includes(mon)) {
-
-// As you understood, code duplication refers to mentioning a variable multiple times.
-// In these simple examples, you didn't gain much. But if you follow this rule in real complex logical conditions, their readability can improve significantly.
-
-// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Avoid lines duplication.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -338,7 +319,26 @@ END IF;
 // Note that a pattern is being used where, in cases when it's not necessary to assign a variable's value to a field, the field is assigned its own value.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// No code duplication in loops.
+// Avoid code duplication when comparing a value against multiple values.
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// PL/SQL:
+// Instead of
+IF v_mon = 'DEC' OR v_mon = 'JAN' OR v_mon = 'FEB' THEN
+// write
+IF v_mon IN ('DEC', 'JAN', 'FEB') THEN
+
+// JavaScript & TypeScript:
+// Instead of
+if (mon == 'DEC' || mon == 'JAN' || mon == 'FEB' || ) {
+// write
+if (['DEC', 'JAN', 'FEB'].includes(mon)) {
+
+// As you understood, code duplication refers to mentioning a variable multiple times.
+// In these simple examples, you didn't gain much. But if you follow this rule in real complex logical conditions, their readability can improve significantly.
+
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Avoid code duplication in loops.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
 // Don't populate the loop control variable twice—once before the loop and again inside the loop body. Populate it only once, inside the loop.
@@ -381,8 +381,7 @@ END LOOP;
 // Duplication may be the root of all evil in software. Many principles and practices have been created for the purpose of controlling or eliminating it.
 // Consider, for example, how object-oriented programming serves to concentrate code into base classes that would otherwise be redundant.
 // Subroutines, structured programming, component-oriented programming, functional programming are all strategies for eliminating duplication from our source code.
-
-// Of all programming principles, Don't Repeat Yourself (DRY) is one of the most fundamental.  
-// It forms the foundation for many other well-known software development best practices and design patterns.  
+ 
+// The Don't Repeat Yourself principle forms the foundation for many other well-known software development best practices and design patterns.  
 // A developer who learns to spot duplication and eliminate it through proper abstraction and good practices will write much cleaner code than
 //         one who keeps spreading unnecessary repetition throughout the application.
