@@ -210,23 +210,25 @@ changeCase("WORLD", CaseType.Lower); // "world"
 // Obviously, the WHERE clause should restrict only by the actually passed parameters, using the next pattern:
 AND (tbl.fld = @arg OR @arg IS NULL)
 
-// Now I'll show you a Sybase T-SQL stored procedure I wrote while working at an insurance company.
-// Requests for the number of client claims are very common in the system — for example, to determine eligibility for certain coverages or to calculate premiums.  
-// While the eligibility criteria and calculation rules vary widely, the core logic stays the same, and the search is always performed across two tables.
-// The total length of duplicated code through the system was shocking! I couldn't stand it any longer, and wrote this procedure:
+// Now I'll provide a Sybase T-SQL stored procedure I wrote while working at an insurance company.
+// When I came to the project, I discovered that queries to count the number of client claims were very common.
+// For example, to determine eligibility for certain coverages or to calculate premiums.
+// The core logic of the claim counting stayed the same - the search was always performed across two tables.  
+// But the coverages eligibility criteria and premiums calculation rules were different, so the WHERE clauses accross the system demonstrated a wide variety of filtering criteria.
+// The total length of duplicated code through the codebase was shocking! I couldn't stand it any longer, and wrote this procedure:
 
 CREATE PROCEDURE s_get_clm_cnt
    @pol_no             numeric(12),
    @pol_ver_dt         smalldatetime,
    @prior_to_dt        smalldatetime,   -- usually pass pol_term_eff_dt, but not always - depending on business requirements
-   @period_in_years    smallint,        -- for how much time before @prior_to_dt
-   @at_fault           char(1),         -- 'Y' = AF only, 'N' = not-AF only, 'A' = Any (AF or not-AF)
-   @before_period      char(1) = 'N',   -- 'Y' = BEFORE @period_in_years, 'N' = DURING @period_in_years; usually 'N', so you can omit this arg in most cases
-   @pol_ver_planloc_no smallint = NULL, -- vehicle; omit to count all vehicles on policy
-   @parm__pol_drv_no   smallint = NULL, -- omit if you don't need to restrict by it (i.e. if you need to count all drivers on vehicle)
-   @parm__pol_clm_typ  tinyint  = NULL, -- omit if you don't need to restrict by it.
-                                        -- The arg is ignored if @at_fault = 'Y'. In thes case, the filter is: pol_clm_typ = 100 /* Chargeable */
-   @parm__plan_cd      smallint = NULL, -- omit if you don't need to restrict by it
+   @period_in_years    smallint,         -- for how much time before @prior_to_dt
+   @at_fault           char(1),          -- 'Y' = AF only, 'N' = not-AF only, 'A' = Any (AF or not-AF)
+   @before_period      char(1) = 'N',     -- 'Y' = BEFORE @period_in_years, 'N' = DURING @period_in_years; usually 'N', so you can omit this arg in most cases
+   @pol_ver_planloc_no smallint = NULL,  -- vehicle; omit to count all vehicles on policy
+   @parm__pol_drv_no   smallint = NULL,  -- omit if you don't need to restrict by it (i.e. if you need to count all drivers on vehicle)
+   @parm__pol_clm_typ  tinyint  = NULL,  -- omit if you don't need to restrict by it.
+                                         -- The arg is ignored if @at_fault = 'Y'. In this case, the filter is: pol_clm_typ = 100 /* Chargeable */
+   @parm__plan_cd      smallint = NULL,  -- omit if you don't need to restrict by it
    @clm_cnt            smallint OUTPUT
 AS
 /******************************************************************************************************************************************
@@ -237,7 +239,10 @@ Michael Zuskin 29-Oct-2019  Created for Portal UW Rules
 DECLARE
    @nm_no           int,
    @gis_clm_cnt     smallint,
-   @non_gis_clm_cnt smallint
+   @non_gis_clm_cnt smallint,
+   @OVERRIDEN       tinyint = 1,
+   @AUTOMATIC       tinyint = 4,
+   @CHARGEABLE      tinyint = 100
 
 IF @parm__pol_drv_no IS NOT NULL BEGIN
    SELECT @nm_no = nm_no
@@ -256,23 +261,23 @@ SELECT @gis_clm_cnt = count(*)
    AND v.pol_no             = c.pol_no
    AND v.pol_ver_dt         = c.pol_ver_dt
    
-   AND sa_clm_appl_cd      IN (1 /* Overriden */, 4 /* Automatic */)
-   AND sa_clm_no           IS NULL -- Ignore Related Claims
+   AND sa_clm_appl_cd      IN (@OVERRIDEN, @AUTOMATIC)
+   AND sa_clm_no           IS NULL -- ignore related claims
 
    AND (c.drv_nm_no   = @nm_no             OR @parm__pol_drv_no  IS NULL) 
    AND (c.pol_clm_typ = @parm__pol_clm_typ OR @parm__pol_clm_typ IS NULL)
    AND (c.plan_cd     = @parm__plan_cd     OR @parm__plan_cd     IS NULL)
 
    AND (
-          (@before_period = 'Y' AND c.loss_dt <  DateAdd (year, (@period_in_years * -1), @prior_to_dt))
+          @before_period = 'Y' AND c.loss_dt <  DateAdd (year, (@period_in_years * -1), @prior_to_dt)
           OR
-          (@before_period = 'N' AND c.loss_dt >= DateAdd (year, (@period_in_years * -1), @prior_to_dt))
+          @before_period = 'N' AND c.loss_dt >= DateAdd (year, (@period_in_years * -1), @prior_to_dt)
        )
 
    AND (
-          (@at_fault IN ('Y', 'A') AND c.pol_clm_typ =  100 /* Chargeable */)
+          @at_fault IN ('Y', 'A') AND c.pol_clm_typ =  @CHARGEABLE
           OR
-          (@at_fault IN ('N', 'A') AND c.pol_clm_typ <> 100 /* Chargeable */)
+          @at_fault IN ('N', 'A') AND c.pol_clm_typ <> @CHARGEABLE
        )
 
 SELECT @non_gis_clm_cnt = count(*)
@@ -288,24 +293,24 @@ SELECT @non_gis_clm_cnt = count(*)
    AND c.nm_drv_oth_clm_no     = v.nm_drv_oth_clm_no
    AND c.nm_drv_oth_clm_ver_dt = v.nm_drv_oth_clm_ver_dt
 
-   AND sa_clm_appl_cd          IN (1 /* Overriden */, 4 /* Automatic */)
+   AND sa_clm_appl_cd          IN (@OVERRIDEN, @AUTOMATIC)
    AND v.oth_clm_amt           >= 0                              
-   AND isnull(c.chg_sta_cd,'N') <> 'D'
+   AND IsNull(c.chg_sta_cd,'N') <> 'D'
 
-   AND ((v.nm_no = @nm_no OR v.drv_nm_no = @nm_no) OR @parm__pol_drv_no  IS NULL)
-   AND (v.pol_clm_typ = @parm__pol_clm_typ         OR @parm__pol_clm_typ IS NULL)
-   AND (v.plan_cd     = @parm__plan_cd             OR @parm__plan_cd     IS NULL)
+   AND (@nm_no IN (v.nm_no, v.drv_nm_no)   OR @parm__pol_drv_no  IS NULL)
+   AND (v.pol_clm_typ = @parm__pol_clm_typ OR @parm__pol_clm_typ IS NULL)
+   AND (v.plan_cd     = @parm__plan_cd     OR @parm__plan_cd     IS NULL)
 
    AND (
-          (@before_period = 'Y' AND v.loss_dt <  DateAdd (year, (@period_in_years * -1), @prior_to_dt))
+          @before_period = 'Y' AND v.loss_dt <  DateAdd (year, (@period_in_years * -1), @prior_to_dt)
           OR
-          (@before_period = 'N' AND v.loss_dt >= DateAdd (year, (@period_in_years * -1), @prior_to_dt))
+          @before_period = 'N' AND v.loss_dt >= DateAdd (year, (@period_in_years * -1), @prior_to_dt)
        )
 
    AND (
-          (@at_fault IN ('Y', 'A') AND v.pol_clm_typ =  100 /* Chargeable */)
+          @at_fault IN ('Y', 'A') AND v.pol_clm_typ =  @CHARGEABLE
           OR
-          (@at_fault IN ('N', 'A') AND v.pol_clm_typ <> 100 /* Chargeable */)
+          @at_fault IN ('N', 'A') AND v.pol_clm_typ <> @CHARGEABLE
        )
 
 SET @clm_cnt = IsNull(@gis_clm_cnt, 0) + IsNull(@non_gis_clm_cnt, 0)
@@ -362,9 +367,9 @@ SELECT ...,
   FROM ...
  WHERE col1 IN (1, 2, 3);
 
-// Be careful when building the new WHERE clause. It must, in total, filter exactly what the old WHERE clauses filtered.
+// Be careful when building the new WHERE clause. It must filter exactly what the old WHERE clauses filtered in total.
 
-// Another example demonstrates the idea using an UPDATE statement:
+// Another example demonstrates the same idea using an UPDATE statement:
 
 // *** BAD code: ***
 
