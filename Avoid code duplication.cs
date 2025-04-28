@@ -3,7 +3,7 @@
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Whenever repetition is found in the code base, a good programmer should refactor it so the logic for handling a specific task or rule exists in only one place.
-// This means moving shared logic into a single reusable code block—either a generic fragment within the same function or a new, dedicated function.
+// This means moving shared logic into a single reusable code block - either a generic fragment within the same function or a new, dedicated function.
 // This kind of careful code reuse minimizes bugs, strengthens code reliability, and is a key principle of defensive programming.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,10 +22,10 @@
 // Often, we have a piece of code that works well in one place, and then we need similar functionality elsewhere.
 // It's tempting to copy, tweak, and move on. But every time we do that, we face two serious risks:
 
-// 1. When requirements change, we must update all copies of the duplicated logic—not just the original. If we miss even one copy, bugs can creep in.
+// 1. When requirements change, we must update all copies of the duplicated logic - not just the original. If we miss even one copy, bugs can creep in.
 // And since the developer may not even know duplication exists (buried deep in hundreds of functions across the codebase), this is a very real threat.
 
-// 2. If a bug is discovered in one of the duplicated blocks, we often fix the version that was tested—but "forget" the other similar fragments since we don't know that they exist.
+// 2. If a bug is discovered in one of the duplicated blocks, we often fix the version that was tested - but "forget" the other similar fragments since we don't know that they exist.
 // As a result, identical bugs can remain hidden in other parts of the application, potentially for years.
 
 // On the other hand, if all logic is centralized in one place that serves multiple parts of the application, any fix or enhancement is automatically shared across all those parts.
@@ -36,11 +36,28 @@
 // In databases, shared data is moved into a separate table, and other tables reference it instead of storing duplicate copies.
 // Here, we're applying the same concept normalizing the program code rather than data.
 
+// The duplicated functionality can be absolutely IDENTICAL or just SIMILAR.
+// It can be WITHIN A SAME FUNCTION or IN DIFFERENT FUNCTIONS.
+// This gives 4 combinations, which are described in the next 4 sections.
+
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Avoid lines duplication.
+// Refactor IDENTICAL code fragments WITHIN A SAME FUNCTION into a new function.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Don't write similar code more than once. Instead, handle the differences in a single, generic block.
+// Then call that function from the original spots, supplying the unique, situation-specific data.
+
+// Sometimes, a function has a fragment which is repeated multiple times within it.
+// For example, when a few variables ​​are subjected to the same processing and this cannot be done in a loop.
+// In this case, the repeated logic must be isolated into a separate private function in the same class, which accepts the data to process through parameters.
+
+// Many programming languages allow creating local functions inside other functions - this feature is very useful in this situation.
+// It's a great way to normalize code without having to go beyond the function if the normalized code will not used anywhere else.
+
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Merge SIMILAR code fragments WITHIN A SAME FUNCTION into one smart generic fragment.
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Even if a few pieces, sharing similar logic, are not absolutely identical, consider writing a single, generic block with the common logic, which handles the differences.
 // The following example was taken from an old Sybase Transact-SQL stored procedure I was enhancing:
 
 // *** BAD code: ***
@@ -54,7 +71,7 @@ ELSE
                + '-' + right ('00' + convert (varchar, @brok_ofc_no), 3)
                + ' ' + @name + ' - ' + @street_addr_1 + ' ' + @city + ', ' + @province
 
-// First of all, this approach forces the reader to compare both fragments, trying to spot the differences—only to realize they hardly exist.
+// This approach forces the reader to compare both fragments, trying to spot the differences — only to realize that the differences hardly exist.
 // If I would be the author, I would write this way:
 
 // *** GOOD code: ***
@@ -64,8 +81,10 @@ SET @brok_dtl = CASE WHEN @lang = 'FR' THEN 'Courtier: ' ELSE 'Broker: ' END
                + '-' + right ('00' + convert (varchar, @brok_ofc_no), 3)
                + ' ' + @name + ' - ' + @street_addr_1 + ' ' + @city + ', ' + @province
 
+// Now, the difference in logic for both the situations is immediately obvious, and the overall length of the function is reduced.
+
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Refactor IDENTICAL code fragments into a new function and call it from the places where the code was originally located.
+// Refactor IDENTICAL code fragments IN DIFFERENT FUNCTIONS into a new function.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // If the duplicated fragments are in functions in one class, create the new function in the same class as private.
@@ -120,17 +139,11 @@ class Dog extends Mammal {
 
 // In real life, of course, you will pass some data to the new function and receive some data from it.
 
-// If the classes don't share a common ancestor, create a generic function in a third class—even if you need to create that class just for this one function.
+// If the classes don't share a common ancestor, create a generic function in a third class — even if you need to create that class just for this one function.
 // If you're working in a non-object-oriented language (like C or Transact-SQL), simply extract the code into a new function or stored procedure.
 
-// Sometimes, the duplicated fragments are within a same function - for example, when multiple variables ​​are subjected to the same processing and this cannot be done in a loop.
-// In this case, the duplicated logic must also be isolated into a separate private function in the same class.
-// Many programming languages allow creating local functions inside other functions - this feature is very useful in this situation.
-// It's a great way to normalize code without having to go beyond the function if the normalized code will not used anywhere else.
-
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Refactor SIMILAR code fragments (and merge functions with SIMILAR functionality) into a new, smart generic function—even if the fragments are not absolutely identical.
-// Then call this function from the original places, supplying the unique, caller-specific data.
+// Refactor SIMILAR code fragments IN DIFFERENT FUNCTIONS (and merge whole functions with SIMILAR functionality) into a new, smart generic function.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // There are different ways to provide this unique data, for example:
@@ -189,15 +202,16 @@ changeCase("WORLD", CaseType.Lower); // "world"
 // The next section contains a real example of such a refactoring.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// If you often query data from a single database table using different search criteria, create one generic stored procedure.  
-// Pass the optional search criteria through optional (i.e. with default values) parameters.
+// If you often query data from a same database table using different search criteria, create one generic stored procedure.  
+// Pass any situation-specific search criteria through optional parameters.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-// Then, call this procedure from various places, passing custom parameter sets as needed.
-// Obviously, the WHERE clause should restrict only by the parameters through which the values ​​are actually passed.
+// The bunch of optional parameters allows to pass any custom parameter sets as needed.
+// Obviously, the WHERE clause should restrict only by the actually passed parameters, using the next pattern:
+AND (tbl.fld = @arg OR @arg IS NULL)
 
 // Now I'll show you a Sybase T-SQL stored procedure I wrote while working at an insurance company.
-// Requests for the number of client claims are very common in the system—for example, to determine eligibility for certain coverages or to calculate premiums.  
+// Requests for the number of client claims are very common in the system — for example, to determine eligibility for certain coverages or to calculate premiums.  
 // While the eligibility criteria and calculation rules vary widely, the core logic stays the same, and the search is always performed across two tables.
 // The total length of duplicated code through the system was shocking! I couldn't stand it any longer, and wrote this procedure:
 
@@ -300,7 +314,7 @@ RETURN
 
 // The reaction of some colleagues who had been on the project for years was interesting.  
 // Some looked at me like a super-programmer — even though writing this procedure (and a few others like it) was far easier than launching a rocket to Mars.  
-// But one developer said these procedures shouldn't be used—for the sake of consistency with the old code.
+// But one developer said these procedures shouldn't be used - for the sake of consistency with the old code.
 // My reply was: "I don't want to be consistent with bad practices!"
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -398,7 +412,7 @@ if (['DEC', 'JAN', 'FEB'].includes(mon)) {
 // Avoid code duplication in loops.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-// Don't populate the loop control variable twice—once before the loop and again inside the loop body. Populate it only once, inside the loop.
+// Don't populate the loop control variable twice - once before the loop and again inside the loop body. Populate it only once, inside the loop.
 
 // You might ask, why? After all, most programming books show this kind of duplication.
 // The answer is simple: we should avoid any form of code duplication. There's no need to write something twice if writing it once achieves the same result.
