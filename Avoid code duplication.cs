@@ -68,61 +68,118 @@ SET @brok_dtl = CASE WHEN @lang = 'FR' THEN 'Courtier: ' ELSE 'Broker: ' END
 // Refactor IDENTICAL code fragments into a new function and call it from the places where the code was originally located.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// If the duplicated fragments are in classes that share a common ancestor, place the new function in that ancestor and call it from the child classes.
+// If the duplicated fragments are in functions in one class, create the new function in the same class as private.
+
+// If the duplicated fragments are in functions in different classes with a common ancestor, create the new function in the ancestor as protected:
+
+// *** BAD code: ***
+
+class Mammal {
+    
+}
+
+class Cat extends Mammal {
+    demonstrateJoy(): void {
+        // fragment unique for Cats
+        // fragment common for Cats and Dogs :-(
+        // fragment unique for Cats
+    }
+}
+
+class Dog extends Mammal {
+    demonstrateJoy(): void {
+        // fragment unique for Dogs
+        // fragment common for Cats and Dogs :-(
+        // fragment unique for Dogs
+    }
+}
+
+// *** GOOD code: ***
+
+class Mammal {
+    protected doSomething(): void {
+        // fragment common for Cats and Dogs :-)
+    }
+}
+
+class Cat extends Mammal {
+    demonstrateJoy(): void {
+        // fragment unique for Cats
+        this.doSomething();
+        // fragment unique for Cats
+    }
+}
+
+class Dog extends Mammal {
+    demonstrateJoy(): void {
+        // fragment unique for Dogs
+        this.doSomething();
+        // fragment unique for Dogs
+    }
+}
+
+// In real life, of course, you will pass some data to the new function and receive some data from it.
+
 // If the classes don't share a common ancestor, create a generic function in a third class—even if you need to create that class just for this one function.
 // If you're working in a non-object-oriented language (like C or Transact-SQL), simply extract the code into a new function or stored procedure.
 
-// Many programming languages allow creating local functions inside other functions.
-// This is a great way to normalize code without having to go beyond the function if the normalized code will not be used anywhere else.
+// Sometimes, the duplicated fragments are within a same function - for example, when multiple variables ​​are subjected to the same processing and this cannot be done in a loop.
+// In this case, the duplicated logic must also be isolated into a separate private function in the same class.
+// Many programming languages allow creating local functions inside other functions - this feature is very useful in this situation.
+// It's a great way to normalize code without having to go beyond the function if the normalized code will not used anywhere else.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Refactor SIMILAR code fragments (and merge functions with SIMILAR functionality) into a new, smart generic function—even if they aren't absolutely identical.
+// Refactor SIMILAR code fragments (and merge functions with SIMILAR functionality) into a new, smart generic function—even if the fragments are not absolutely identical.
+// Then call this function from the original places, supplying the unique, caller-specific data.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Then call this function from the places where the result is needed, supplying the unique, caller-specific data.
 // There are different ways to provide this unique data, for example:
 // 
 // 1. As arguments.
 //      The specific data is passed directly as one or more arguments to the new generic function.
-// 2. Through a return value from a dedicated function.
+// 2. Using instance variables.
+//      If the original duplicated fragments were in classes that inherit from the same superclass, create the instance variable in the superclass as protected.
+//      The generic function must verify that the instance variable has been populated.
+// 3. Through a return value from a dedicated function.
 //      You can create that function only for the sake of returning the circumstances-dependent data to one universal algorithm.
-//      If the original duplicated fragments were in classes that inherit from the same superclass, create the function in the superclass as `protected`.
+//      If the original duplicated fragments were in classes that inherit from the same superclass, create the function in the superclass as protected.
 //      Make it abstract if your programming language supports abstract methods.
-//      If it doesn't abstract methods, implement the function at the ancestor level even though it makes no sense.
+//      If abstract methods are not supported (like in PowerBuilder), implement the new function at the ancestor level even though it makes no sense.
 //      The code must only throw an exception to clearly indicate that the base version must never be called and is intended to be overridden.
-// 3. Using an instance variable.
-//      If the original duplicated fragments were in classes that inherit from the same superclass, create the instance variable in the superclass as `protected`.
 
 // For example, we have two TypeScript functions (I realize this example is extremely idiotic, but it demonstrates the idea well):
 
 function changeCaseToUpper(input: string): string {
-  console.log("Going to make it upper...");
-  const transformed = input.toUpperCase();
-  console.log("Made it upper!");
-  return transformed;
+    console.log("Going to make it upper...");
+    const transformed = input.toUpperCase();
+    console.log("Made it upper!");
+    return transformed;
 }
 
 function changeCaseToLower(input: string): string {
-  console.log("Going to make it lower...");
-  const transformed = input.toLowerCase();
-  console.log("Made it lower!");
-  return transformed;
+    console.log("Going to make it lower...");
+    const transformed = input.toLowerCase();
+    console.log("Made it lower!");
+    return transformed;
 }
 
-// The code of thse functions is not IDENTICAL but still pretty SIMILAR.
-// Of course, we will not tolerate such code duplication - even within different lines.
-// Let's strain our intellect a little and give birth to a new generic function:
+// Example usage:
+changeCaseToUpper("hello"); // "HELLO"
+changeCaseToLower("WORLD"); // "world"
+
+// The code of thse functions is not absolutely IDENTICAL, it cannot be simply extracted to a new function.
+// But the functions are pretty SIMILAR, so let's strain our intellect a little and give birth to a new generic function:
 
 const enum CaseType {
-  Upper = "upper",
-  Lower = "lower",
+    Upper = "upper",
+    Lower = "lower",
 }
 
 function changeCase(input: string, caseType: CaseType): string {
-  console.log(`Going to make it ${caseType}...`);
-  const transformed = (caseType === CaseType.Upper) ? input.toUpperCase() : input.toLowerCase();
-  console.log(`Made it ${caseType}!`);
-  return transformed;
+    console.log(`Going to make it ${caseType}...`);
+    const transformed = (caseType === CaseType.Upper) ? input.toUpperCase() : input.toLowerCase();
+    console.log(`Made it ${caseType}!`);
+    return transformed;
 }
 
 // Example usage:
@@ -335,7 +392,7 @@ if (mon == 'DEC' || mon == 'JAN' || mon == 'FEB' || ) {
 if (['DEC', 'JAN', 'FEB'].includes(mon)) {
 
 // As you understood, code duplication refers to mentioning a variable multiple times.
-// In these simple examples, you didn't gain much. But if you follow this rule in real complex logical conditions, their readability can improve significantly.
+// In these simple examples, you didn't gain much. But if you follow this rule in real complex Boolean expressions, their readability can improve significantly.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Avoid code duplication in loops.
