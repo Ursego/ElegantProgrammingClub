@@ -269,9 +269,9 @@ SELECT @gis_clm_cnt = count(*)
    AND (c.plan_cd     = @parm__plan_cd     OR @parm__plan_cd     IS NULL)
 
    AND (
-          @before_period = 'Y' AND c.loss_dt <  DateAdd (year, (@period_in_years * -1), @prior_to_dt)
+          @before_period = 'Y' AND c.loss_dt <  DateAdd(year, (@period_in_years * -1), @prior_to_dt)
           OR
-          @before_period = 'N' AND c.loss_dt >= DateAdd (year, (@period_in_years * -1), @prior_to_dt)
+          @before_period = 'N' AND c.loss_dt >= DateAdd(year, (@period_in_years * -1), @prior_to_dt)
        )
 
    AND (
@@ -302,9 +302,9 @@ SELECT @non_gis_clm_cnt = count(*)
    AND (v.plan_cd     = @parm__plan_cd     OR @parm__plan_cd     IS NULL)
 
    AND (
-          @before_period = 'Y' AND v.loss_dt <  DateAdd (year, (@period_in_years * -1), @prior_to_dt)
+          @before_period = 'Y' AND v.loss_dt <  DateAdd(year, (@period_in_years * -1), @prior_to_dt)
           OR
-          @before_period = 'N' AND v.loss_dt >= DateAdd (year, (@period_in_years * -1), @prior_to_dt)
+          @before_period = 'N' AND v.loss_dt >= DateAdd(year, (@period_in_years * -1), @prior_to_dt)
        )
 
    AND (
