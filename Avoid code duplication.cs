@@ -17,7 +17,7 @@
 
 // Every line of code in an application must be maintained and can become a source of future bugs.
 // Duplication unnecessarily bloats the codebase, creating more chances for bugs and adding accidental complexity.
-// This extra bloat also makes it harder for developers to understand the whole system or to be sure that a change in one place doesn’t also need to be made in other places.
+// This extra bloat also makes it harder for developers to understand the whole system or to be sure that a change in one place doesn't also need to be made in other places.
 
 // Often, we have a piece of code that works well in one place, and then we need similar functionality elsewhere.
 // It's tempting to copy, tweak, and move on. But every time we do that, we face two serious risks:
@@ -37,10 +37,29 @@
 // Here, we're applying the same concept normalizing the program code rather than data.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Avoid code duplication within a function.
+// Avoid code duplication when comparing a value against multiple values.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Don’t write similar code more than once. Instead, handle the differences in a single, generic block.
+// PL/SQL:
+// Instead of
+IF v_mon = 'DEC' OR v_mon = 'JAN' OR v_mon = 'FEB' THEN
+// write
+IF v_mon IN ('DEC', 'JAN', 'FEB') THEN
+
+// JavaScript & TypeScript:
+// Instead of
+if (mon == 'DEC' || mon == 'JAN' || mon == 'FEB' || ) {
+// write
+if (['DEC', 'JAN', 'FEB'].includes(mon)) {
+
+// As you understood, code duplication refers to mentioning a variable multiple times.
+// In these simple examples, you didn't gain much. But if you follow this rule in real complex logical conditions, their readability can improve significantly.
+
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Avoid lines duplication.
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Don't write similar code more than once. Instead, handle the differences in a single, generic block.
 // The following example was taken from an old Sybase Transact-SQL stored procedure I was enhancing:
 
 // *** BAD code: ***
@@ -54,7 +73,7 @@ ELSE
                + '-' + right ('00' + convert (varchar, @brok_ofc_no), 3)
                + ' ' + @name + ' - ' + @street_addr_1 + ' ' + @city + ', ' + @province
 
-// First of all, this approach forces the reader to compare both fragments, trying to spot the differences—only to realize they are minimal.
+// First of all, this approach forces the reader to compare both fragments, trying to spot the differences—only to realize they hardly exist.
 // If I would be the author, I would write this way:
 
 // *** GOOD code: ***
@@ -65,18 +84,21 @@ SET @brok_dtl = CASE WHEN @lang = 'FR' THEN 'Courtier: ' ELSE 'Broker: ' END
                + ' ' + @name + ' - ' + @street_addr_1 + ' ' + @city + ', ' + @province
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Extract IDENTICAL code fragments into a new function and call it from the places where the code was originally located.
+// Refactor IDENTICAL code fragments into a new function and call it from the places where the code was originally located.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // If the duplicated fragments are in classes that share a common ancestor, place the new function in that ancestor and call it from the child classes.
-// If the classes don’t share a common ancestor, create a generic function in a third class—even if you need to create that class just for this one function.
+// If the classes don't share a common ancestor, create a generic function in a third class—even if you need to create that class just for this one function.
 // If you're working in a non-object-oriented language (like C or Transact-SQL), simply extract the code into a new function or stored procedure.
 
+// Many programming languages allow creating local functions inside other functions.
+// This is a great way to normalize code without having to go beyond the function if the normalized code will not be used anywhere else.
+
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Extract SIMILAR code fragments (and merge functions with SIMILAR functionality) into a new, smart generic function—even if they aren’t exactly identical.
+// Refactor SIMILAR code fragments (and merge functions with SIMILAR functionality) into a new, smart generic function—even if they aren't absolutely identical.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Then call this function from the places where the result is needed, supplying the unique, location-specific data.
+// Then call this function from the places where the result is needed, supplying the unique, caller-specific data.
 // There are different ways to provide this unique data, for example:
 // 
 // 1. As arguments.
@@ -85,7 +107,7 @@ SET @brok_dtl = CASE WHEN @lang = 'FR' THEN 'Courtier: ' ELSE 'Broker: ' END
 //      You can create that function only for the sake of returning the circumstances-dependent data to one universal algorithm.
 //      If the original duplicated fragments were in classes that inherit from the same superclass, create the function in the superclass as `protected`.
 //      Make it abstract if your programming language supports abstract methods.
-//      If it doesn’t, implement the function at the ancestor level even though it makes no sense.
+//      If it doesn't abstract methods, implement the function at the ancestor level even though it makes no sense.
 //      The code must only throw an exception to clearly indicate that the base version must never be called and is intended to be overridden.
 // 3. Using an instance variable.
 //      If the original duplicated fragments were in classes that inherit from the same superclass, create the instance variable in the superclass as `protected`.
@@ -93,33 +115,40 @@ SET @brok_dtl = CASE WHEN @lang = 'FR' THEN 'Courtier: ' ELSE 'Broker: ' END
 // For example, we have two TypeScript functions (I realize this example is extremely idiotic, but it demonstrates the idea well):
 
 function changeCaseToUpper(input: string): string {
-  alert("Going to make it upper...");
+  console.log("Going to make it upper...");
   const transformed = input.toUpperCase();
-  alert("Made it upper!");
+  console.log("Made it upper!");
   return transformed;
 }
 
 function changeCaseToLower(input: string): string {
-  alert("Going to make it lower...");
+  console.log("Going to make it lower...");
   const transformed = input.toLowerCase();
-  alert("Made it lower!");
+  console.log("Made it lower!");
   return transformed;
 }
 
-// We strain our intellect a little and give birth to a new generic function:
+// The code of thse functions is not IDENTICAL but still pretty SIMILAR.
+// Of course, we will not tolerate such code duplication - even within different lines.
+// Let's strain our intellect a little and give birth to a new generic function:
 
-type CaseType = "upper" | "lower";
+const enum CaseType {
+  Upper = "upper",
+  Lower = "lower",
+}
 
 function changeCase(input: string, caseType: CaseType): string {
-  alert(`Going to make it ${caseType}...`);
-  const transformed = (caseType === "upper") ? input.toUpperCase() : input.toLowerCase();
-  alert(`Made it ${caseType}!`);
+  console.log(`Going to make it ${caseType}...`);
+  const transformed = (caseType === CaseType.Upper) ? input.toUpperCase() : input.toLowerCase();
+  console.log(`Made it ${caseType}!`);
   return transformed;
 }
 
-// Example usage with alert:
-alert(changeCase("hello", "upper"));
-alert(changeCase("WORLD", "lower"));
+// Example usage:
+changeCase("hello", CaseType.Upper); // "HELLO"
+changeCase("WORLD", CaseType.Lower); // "world"
+
+// The next section contains a real example of such a refactoring.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // If you often query data from a single database table using different search criteria, create one generic stored procedure.  
@@ -129,10 +158,10 @@ alert(changeCase("WORLD", "lower"));
 // Then, call this procedure from various places, passing custom parameter sets as needed.
 // Obviously, the WHERE clause should restrict only by the parameters through which the values ​​are actually passed.
 
-// Now I'll show you a real Sybase T-SQL procedure I wrote while working at an insurance company.
+// Now I'll show you a Sybase T-SQL stored procedure I wrote while working at an insurance company.
 // Requests for the number of client claims are very common in the system—for example, to determine eligibility for certain coverages or to calculate premiums.  
 // While the eligibility criteria and calculation rules vary widely, the core logic stays the same, and the search is always performed across two tables.
-// The total length of duplicated code through the system was shocking! I couldn’t stand it any longer, and wrote this procedure:
+// The total length of duplicated code through the system was shocking! I couldn't stand it any longer, and wrote this procedure:
 
 CREATE PROCEDURE s_get_clm_cnt
    @pol_no             numeric(12),
@@ -153,7 +182,6 @@ Returns the total count of claims for given vehicle for given period of time per
 *******************************************************************************************************************************************
 Michael Zuskin 29-Oct-2019  Created for Portal UW Rules
 *******************************************************************************************************************************************/
-
 DECLARE
    @nm_no           int,
    @gis_clm_cnt     smallint,
@@ -234,64 +262,119 @@ RETURN
 
 // The reaction of some colleagues who had been on the project for years was interesting.  
 // Some looked at me like a super-programmer — even though writing this procedure (and a few others like it) was far easier than launching a rocket to Mars.  
-// And one developer said these procedures shouldn’t be used—for the sake of consistency with the old code.
-// But I have no interest in being consistent with bad practices!
+// But one developer said these procedures shouldn't be used—for the sake of consistency with the old code.
+// My reply was: "I don't want to be consistent with bad practices!"
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Use CHOOSE CASE to avoid duplication od SQL queries
+// Instead of writing a few SQL statement which differ from each other in minor details, write one statement. Use a CASE statement to handle the differences.
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Many times I've seen several SQL SELECT statements following each other. They were very similar, almost identical, differing only in some small detail. Something like these:
+// Not once, I've encountered sequences of nearly identical queries. They were often different only in subtle, easily overlooked details. For example:
 
 // *** BAD code: ***
 
-SELECT order_id,
-       customer_id,
-       order_date,
-       order_total,
-       5 AS discount_percentage
-  FROM orders
- WHERE order_date > ADD_MONTHS(SYSDATE, -3)
-   AND order_total BETWEEN 50 AND 99.99
+SELECT ...,
+       'One' AS col1_desc,
+       ...
+  FROM ...
+ WHERE col1 = 1
 
 UNION
 
-SELECT order_id,
-       customer_id,
-       order_date,
-       order_total,
-       10 AS discount_percentage
-  FROM orders
- WHERE order_date > ADD_MONTHS(SYSDATE, -3)
-   AND order_total BETWEEN 100 AND 299.99
+SELECT ...,                   -- same as in the first SELECT
+       'Two' AS col1_desc,
+       ...                    -- same as in the first SELECT
+  FROM ...                    -- same as in the first SELECT
+ WHERE col1 = 2
 
 UNION
 
-SELECT order_id,
-       customer_id,
-       order_date,
-       order_total,
-       15 AS discount_percentage
-  FROM orders
- WHERE order_date > ADD_MONTHS(SYSDATE, -3)
-   AND order_total >= 300;
+SELECT ...,                   -- same as in the first SELECT
+       'Three' AS col1_desc,
+       ...                    -- same as in the first SELECT
+  FROM ...                    -- same as in the first SELECT
+ WHERE col1 = 3;
 
-// This is not an elegant solution, because a single query with a simple CHOOSE CASE expression would do the same work!
+// Often each SELECT is long and complex, includes the selection of many columns from many tables, and contains calculations. All of this gets duplicated multiple times!
+// I don't know why the authors of such code decided to write it this way, when a single query with a simple CASE statement would handle the job perfectly.
 
 // *** GOOD code: ***
 
-SELECT order_id,
-       customer_id,
-       order_date,
-       order_total,
-       CASE 
-          WHEN order_total < 100 THEN 5
-          WHEN order_total >= 300 THEN 15
-          ELSE 10
-       END AS discount_percentage
-  FROM orders
- WHERE order_date > ADD_MONTHS(SYSDATE, -3)
-   AND order_total >= 50;
+SELECT ...,
+       CASE col1
+          WHEN 1 THEN 'One'
+          WHEN 2 THEN 'Two'
+          WHEN 3 THEN 'Three'
+       AS col1_desc,
+       ...
+  FROM ...
+ WHERE col1 IN (1, 2, 3);
+
+// Be careful when building the new WHERE clause. It must, in total, filter exactly what the old WHERE clauses filtered.
+
+// Another example demonstrates the idea using an UPDATE statement:
+
+// *** BAD code: ***
+
+IF v_var1 > v_var2 THEN
+  UPDATE ...
+    SET col1 = v_some_var
+    WHERE ...
+ELSIF v_var1 < v_var2 THEN
+  UPDATE ...                    -- same as in the first UPDATE
+	 SET col2 = v_some_var
+   WHERE ...;                   -- same as in the first UPDATE
+END IF;
+
+// *** GOOD code: ***
+
+IF NVL(v_var1, 0) <> NVL(v_var2, 0) THEN
+  UPDATE ...
+	   SET col1 = CASE WHEN v_var1 > v_var2 THEN v_some_var ELSE col1 END,
+         col2 = CASE WHEN v_var1 < v_var2 THEN v_some_var ELSE col2 END
+   WHERE ...;
+END IF;
+
+// Note that a pattern is being used where, in cases when it's not necessary to assign a variable's value to a field, the field is assigned its own value.
+
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// No code duplication in loops.
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+// Don't populate the loop control variable twice—once before the loop and again inside the loop body. Populate it only once, inside the loop.
+
+// You might ask, why? After all, most programming books show this kind of duplication.
+// The answer is simple: we should avoid any form of code duplication. There's no need to write something twice if writing it once achieves the same result.
+
+// *** BAD code: ***
+
+FETCH emp_cursor INTO v_row;
+WHILE emp_cursor%FOUND LOOP
+   [do something]
+   FETCH emp_cursor INTO v_row; -- deja vu!
+END LOOP;
+
+// An eternal (aka "simple") loop with 'break' ('exit when' in this PL/SQL example) is a very elegant solution in such cases.
+
+// *** GOOD code: ***
+
+LOOP
+   FETCH emp_cursor INTO v_row;
+   EXIT WHEN emp_cursor%NOTFOUND; -- or "IF emp_cursor%NOTFOUND THEN BREAK;"
+   [do something]
+END LOOP;
+
+// From the book "PL/SQL Best Practices":
+
+// "Use a simple loop to avoid redundant code required by a WHILE loop.
+
+// Generally, you should use a simple loop if you always want the body of the loop to execute at least once.
+// You use a WHILE loop if you want to check before executing the body the first time.
+// Since the WHILE loop performs its check "up front," the variables in the boundary expression must be initialized.
+// The code to initialize is often the same code needed to move to the next iteration in the WHILE loop.
+// This redundancy creates a challenge in both debugging and maintaining the code: how do you remember to look at and update both?
+
+// If you find yourself writing and running the same code before the WHILE loop and at end of the WHILE loop body, consider switching to a simple loop."
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
