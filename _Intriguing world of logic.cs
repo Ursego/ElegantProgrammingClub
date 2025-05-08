@@ -264,24 +264,39 @@ boolean resultY = (localVar1 + localVar2) || this.aBooleanMethodWhichCallsWebSer
 // Now let's look at how short-circuit evaluation is used in different programming languages.
 // ------------------------------------------------------------------------------------------
 
-// It's supported in most C-like syntax languages (C#, Java, Kotlin, Scala, JavaScript, TypeScript) using the && and || operators.
+// It's supported in most C-like syntax languages (C#, Java, Kotlin, Scala, JavaScript, TypeScript) using the standard && and || operators.
 // To avoid short-circuit evaluation in these languages, use bitwise operators & and | instead of && and ||.
 
-// In Oracle PL/SQL, short-circuit evaluation is supported using the AND THEN and OR ELSE operators. For example:
-IF is_ready AND THEN is_valid(item_id) THEN -- is_valid(item_id) will only be called if is_ready is TRUE
+// In Visual Basic.NET, short-circuit evaluation is supported, but only with specific operators AndAlso (instead of And) and OrElse (instead of Or):
+If obj IsNot Nothing AndAlso obj.IsValid() Then ' protect against NullReferenceException
+    Console.WriteLine("Condition is true")
+End If
+If age >= 18 OrElse ExpensiveCheck() Then
+    Console.WriteLine("Condition is true")
+End If
+// To avoid short-circuiting, use the standard And and Or operators.
+
+// In Oracle PL/SQL, short-circuit evaluation is supported, but only with specific operators AND THEN (instead of AND) and OR ELSE (instead of OR):
+IF v_coef <> 0 AND THEN (v_var / v_coef) > .2 THEN -- protect against ZERO_DIVIDE
    process(item_id);
 END IF;
 IF item_in_stock(item_id) OR ELSE is_backorder_allowed(item_id) THEN -- is_backorder_allowed(item_id) will only be called if item_in_stock(item_id) returns FALSE
    approve_order(item_id);
 END IF;
-// To avoid short-circuiting and ensure that all conditions are always evaluated, use the standard AND and OR operators:
-IF is_ready AND is_valid(item_id) THEN -- is_valid(item_id) will always be evaluated
-   process(item_id);
-END IF;
-IF item_in_stock(item_id) OR is_backorder_allowed(item_id) THEN -- is_backorder_allowed(item_id) will always be evaluated
-   approve_order(item_id);
-END IF;
+// To avoid short-circuiting, use the standard AND and OR operators.
 
 // In T-SQL (Transact-SQL), short-circuit evaluation may occur with AND and OR, but it is not guaranteed or formally defined by the SQL Server and Sybase specification.
 // This means that while T-SQL often skips evaluation of the second condition when the result is already determined, developers should not rely on this behavior.
 // All expressions should be written assuming that every part will be evaluated, especially when using conditions that involve function calls, subqueries, or potential side effects.
+
+// In PowerScript, the language used in PowerBuilder, short-circuit evaluation is not supported.
+
+// You can easily check whether your language supports SCE by assigning a Boolean variable the result of an expression where the second part contains a division by zero (translate the expression to your language if needed):
+boolean sceSuported = ((1 = 2) AND (1 = (1 / 0)))
+// If you don't get the zero divide error then SCE is supported.
+// Otherwise, you should manually control the evaluation order to prevent issues. For example, the short-circuit "A AND B" expression can be mimicked this way:
+IF A THEN
+   IF B THEN
+      // ...
+   END IF
+END IF
