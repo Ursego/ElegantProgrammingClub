@@ -1,5 +1,32 @@
 // This file contains multiple tips related to Boolean operations.
 
+// The table on content:
+
+// * Populating Boolean variables
+// * Short conditions in IFs
+// * Boolean functions names
+// * Positive wording in Boolean names
+// * Use the NOT operator as little as possible
+// * Use positive comparisons in Boolean expressions
+// * Use short-circuit evaluation to improve performance
+
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Populating Boolean variables
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// If possible, populate Boolean variables using the result of Boolean expressions instead of assigning true or false directly.
+
+// *** BAD code: ***
+
+if (rowCount > 1)
+   multiRowsMode = true;
+else
+   multiRowsMode = false;
+
+// *** GOOD code: ***
+
+multiRowsMode = (rowCount > 1);
+
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Short conditions in IFs
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +191,7 @@ END IF;
 // Don't forget to account for the possibility that your expressions might evaluate to NULL. That can lead to unexpected behavior if not handled properly.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Try to use positive comparisons in Boolean expressions
+// Use positive comparisons in Boolean expressions
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // *** BAD code: ***
@@ -205,3 +232,56 @@ if (orderStatus == OrderStatus.CLOSED && state == States.MONTANA && dayType == D
 
 // The inequality operator is especially confusing when the entire expression is then negated.
 // It creates the same kind of "negation of a negation" as in the case of negative names ("if not something is not eqal" - just say "if something is eqal"!).
+
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Use short-circuit evaluation to improve performance
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Short-circuit evaluation (SCE), also called "minimal evaluation", refers to how Boolean operators work in expressions like "A AND B" or "A OR B":
+// the second operand is only evaluated if the first operand does not suffice to determine the result of the expression.
+// In other words, the evaluation stops as soon as the outcome is known:
+
+A && B
+// If A evaluates to false, the whole expression will return false — B is not evaluated.
+
+A || B
+// If A evaluates to true, the whole expression will return true — B is not evaluated.
+
+// This means you should structure Boolean expressions so the decision can be made as early as possible.
+// Since A will always be executed, make sure that A is more efficient (i.e., quicker to evaluate) than B:
+
+boolean resultX = (localVar1 + localVar2) && this.aBooleanMethodWhichCallsWebService();
+boolean resultY = (localVar1 + localVar2) || this.aBooleanMethodWhichCallsWebService();
+
+// If A and B have the same performance cost, prioritize A based on likelihood:
+
+// * In A && B, A should be more likely to evaluate to false
+// * In A || B, A should be more likely to evaluate to true
+
+// This increases the chances of skipping the more expensive evaluation of B.
+
+// ------------------------------------------------------------------------------------------
+// Now let's look at how short-circuit evaluation is used in different programming languages.
+// ------------------------------------------------------------------------------------------
+
+// It's supported in most C-like syntax languages (C#, Java, Kotlin, Scala, JavaScript, TypeScript) using the && and || operators.
+// To avoid short-circuit evaluation in these languages, use bitwise operators & and | instead of && and ||.
+
+// In Oracle PL/SQL, short-circuit evaluation is supported using the AND THEN and OR ELSE operators. For example:
+IF is_ready AND THEN is_valid(item_id) THEN -- is_valid(item_id) will only be called if is_ready is TRUE
+   process(item_id);
+END IF;
+IF item_in_stock(item_id) OR ELSE is_backorder_allowed(item_id) THEN -- is_backorder_allowed(item_id) will only be called if item_in_stock(item_id) returns FALSE
+   approve_order(item_id);
+END IF;
+// To avoid short-circuiting and ensure that all conditions are always evaluated, use the standard AND and OR operators:
+IF is_ready AND is_valid(item_id) THEN -- is_valid(item_id) will always be evaluated
+   process(item_id);
+END IF;
+IF item_in_stock(item_id) OR is_backorder_allowed(item_id) THEN -- is_backorder_allowed(item_id) will always be evaluated
+   approve_order(item_id);
+END IF;
+
+// In T-SQL (Transact-SQL), short-circuit evaluation may occur with AND and OR, but it is not guaranteed or formally defined by the SQL Server and Sybase specification.
+// This means that while T-SQL often skips evaluation of the second condition when the result is already determined, developers should not rely on this behavior.
+// All expressions should be written assuming that every part will be evaluated, especially when using conditions that involve function calls, subqueries, or potential side effects.
