@@ -55,10 +55,52 @@ if (structuralChangeOccurred)...
 // I have no explanation for why I have encountered this practice countless times over my decades of working as a programmer.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Positive wording in Boolean names
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Give Boolean database fields, variables, and functions positive names.
+// That makes Boolean expressions easier to read and understand, especially when they're nested.
+
+// The reason for this is that your variables and functions may be used in complex expressions that include negation.
+// Positive naming will result in one negation in the worst case, for example:
+!docPrinted
+// However, with negative naming, you may end up with "a negation of a negation" — a construct that makes the overall logic confusing:
+!docNotPrinted
+// That looks awkward and adds unnecessary clutter.
+
+// You can already see the difference with simple expressions — now imagine them as part of a larger, more complex condition!
+
+// A few examples (negative form to avoid → positive form to prefere):
+
+// nonStandard → standard
+// notFound → found, exists
+// notReady → ready
+// notRetrieved → retrieved
+
+// Try not to use negative prefixes; instead, substitute them with the corresponding positive prefixes:
+
+// excluded → included
+// disabled → enabled
+
+// Instead of using words with the in- and un- prefixes (such as invalid, incomplete, unavailable, unchecked, unconfirmed, unissued, unprotected, unsaved), use their non-prefixed antonyms (valid, complete, available, checked, confirmed, issued, protected, saved).
+
+// Besides direct negation ("NOT something"), try to avoid words that are not negative per se but carry a negative tone.
+// Those words aren’t as harmful as direct negation, but they can still make code harder to read. Here’s a short list of examples:
+
+// closed → open
+// failed → ok, succeeded, successful
+// hidden → displayed, shown
+// expired → inEffect
+// isMissing, isAbsent, isOmitted → exists, provided
+// prohibited → allowed
+
+// Positive names make code more intuitive and maintainable, less error-prone, and just nicer to work with.
+
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Use the NOT operator as little as possible
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Double negatives and inverted logic make code harder to analyze and understand.
+// Multiple negatives and inverted logic make code harder to analyze and understand.
 // Whenever possible, rephrase conditions positively to make your code clearer and more intuitive.
 // Use the De Morgan's Laws to simplify Boolean expressions with multiple negations, so the NOT operator is used only once:
 
@@ -117,10 +159,8 @@ END IF;
 // Don’t forget to account for the possibility that your expressions might evaluate to NULL. That can lead to unexpected behavior if not handled properly.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Try to use positive comparison in Boolean expressions
+// Try to use positive comparisons in Boolean expressions
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// This section, in a way, continues the previous one, since its goal is also to free our lives from negativity. :-)
 
 // *** BAD code: ***
 
@@ -157,3 +197,6 @@ if (orderStatus == OrderStatus.CLOSED && state == States.MONTANA && dayType == D
 }
 
 // Anyway, it's better to evaluate the expression in advance, store its result in a Boolean variable with a clear, descriptive name, and use that variable in the if statement — just as described in the "Short conditions in IFs" section.
+
+// The inequality operator is especially confusing when the entire expression is then negated.
+// It creates the same kind of "negation of a negation" as in the case of negative names ("if not something is not eqal" - just say "if something is eqal"!).
