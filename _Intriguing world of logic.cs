@@ -12,8 +12,8 @@
 
 if ((calcMethod == CalcMethods.ADDITIVE && additiveCalculationPassed) || (calcMethod == CalcMethods.RATIO && ratioCalculationPassed))...
 
-// Wow, that's hard to understand! Okay, maybe this example is easy to understand — but think about real-world logical expressions where you can’t make heads or tails of it...
-// I’ve seen if statements with half-a-screen-long Boolean expressions!
+// Wow, that's hard to understand! Okay, maybe this example is easy to understand — but think about real-world logical expressions where you can't make heads or tails of it...
+// I've seen if statements with half-a-screen-long Boolean expressions!
 
 // However, if you use a Boolean variable to hide the expression's complexity, the result is a code that is virtually as readable as "straight" human language.
 // The BAD code says only WHEN the condition is true, but the GOOD code tells us both WHEN and WHY:
@@ -42,16 +42,16 @@ if (structuralChangeOccurred)...
 // Here are some examples of well-named Boolean methods: rowValidated, ordersOk, fileNameExists.
 // There is a strange tradition is to start such names with words like "is", "are", "does", or "do" (e.g., isRowValidated, areOrdersOk, doesFileNameExist).
 // That style produces awkward or grammatically incorrect expressions in the calling code — we say "if row is validated", not "if is row validated".
-// Of course, this isn’t a critical issue. You can even omit "is" or "are" entirely, and the names will still be clear: rowValidated, ordersOk.
+// Of course, this isn't a critical issue. You can even omit "is" or "are" entirely, and the names will still be clear: rowValidated, ordersOk.
 
-// There’s an exception to this rule — getters of Boolean fields (instance variables). These should follow the standard getField or isField naming convention.
+// There's an exception to this rule — getters of Boolean fields (instance variables). These should follow the standard getField or isField naming convention.
 // In Java, this is part of the JavaBean specification, and it makes sense not just for tools (which can infer field names from getters), but also for developers.
 // For instance, the method name isInvoicePrinted suggests the existence of a Boolean field invoicePrinted in the class, while invoiceIsPrinted doesn't.
 
 // Never use imperative verbs to name Boolean methods!
 
 // Names like validateRow, checkOrders, or checkFileExistence are completely inappropriate for methods that return Boolean values.
-// We don’t say "if validate row then save", "if check orders then print", or "if check file existence then open file".
+// We don't say "if validate row then save", "if check orders then print", or "if check file existence then open file".
 // I have no explanation for why I have encountered this practice countless times over my decades of working as a programmer.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ if (structuralChangeOccurred)...
 // Instead of using words with the in- and un- prefixes (such as invalid, incomplete, unavailable, unchecked, unconfirmed, unissued, unprotected, unsaved), use their non-prefixed antonyms (valid, complete, available, checked, confirmed, issued, protected, saved).
 
 // Besides direct negation ("NOT something"), try to avoid words that are not negative per se but carry a negative tone.
-// Those words aren’t as harmful as direct negation, but they can still make code harder to read. Here’s a short list of examples:
+// Those words aren't as harmful as direct negation, but they can still make code harder to read. Here's a short list of examples:
 
 // closed → open
 // failed → ok, succeeded, successful
@@ -95,6 +95,11 @@ if (structuralChangeOccurred)...
 // prohibited → allowed
 
 // Positive names make code more intuitive and maintainable, less error-prone, and just nicer to work with.
+
+// Don't forget that here we're talking only about Boolean identifiers.
+// Of course, it's absolutely fine to use negative words in the names of non-Boolean database fields and variables (like expiredPoliciesNum), and even in Boolean ones if the negative word is part of the flagged entity.
+// For example, in the names "hiddenChargesExist" and "failedBatchJobRegistered", the words "hidden" and "failed" refer to the entities themselves and are acceptable, while the words "exist" and "registered" represent the Boolean aspect of the names.
+// Also, this rule doesn't apply to non-Boolean functions that perform negative actions—their names should clearly describe what the function does, such as disableSaveButton, prohibitPrinting, excludeInactiveCustomers, or expirePolicy.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Use the NOT operator as little as possible
@@ -131,7 +136,7 @@ v_stay_home = NOT (i_am_hungry AND i_restaurants_are_open_now)
 
 // Now the reader sees a simple positive condition and understands that v_stay_home becomes true only when that condition is not satisfied.
 
-// It’s usually best to avoid using the NOT operator in conditional expressions at all whenever possible.
+// It's usually best to avoid using the NOT operator in conditional expressions at all whenever possible.
 // Many times, I had to maintain existing code that was structured like this:
 
 IF condA AND NOT (condB OR condC) THEN
@@ -156,7 +161,7 @@ ELSIF condD THEN
    proc3;
 END IF;
 
-// Don’t forget to account for the possibility that your expressions might evaluate to NULL. That can lead to unexpected behavior if not handled properly.
+// Don't forget to account for the possibility that your expressions might evaluate to NULL. That can lead to unexpected behavior if not handled properly.
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Try to use positive comparisons in Boolean expressions
