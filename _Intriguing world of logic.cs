@@ -300,18 +300,32 @@ boolean sceSuported = ((1 = 2) AND (1 = (1 / 0)))
 // How to implement short-circuiting if your language doesn't support short-circuit evaluation
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-// Mimic short-circuit "A AND B":
+// ####### Mimic short-circuit "A AND B": #######
 
 IF A THEN
    IF B THEN
       // do it!
    END IF
 END IF
+
+// An alternative way:
+
+boolean doIt = A
+IF doIt THEN
+   doIt = B
+END IF
+IF doIt THEN
+   // do it!
+END IF
+// Of course, the name of your boolean var should not be doIt - it must clearly describe the action which will be performed under the overall condition.
+// The alternative fragment is longer, but it can result in cleaner code, especially if A and B are more complex expressions than just vars or functions.
+// Also, it prevents too much indentation if you have more than two conditions (A, B, C, D...) - you can add any number of "IF doIt THEN" sections, all nicely aligned vertically.
+
 // When returning a boolean value from a function, make its last lines like these:
 IF NOT A THEN RETURN FALSE
 RETURN B
 
-// Mimic short-circuit "A OR B":
+// ####### Mimic short-circuit "A OR B": #######
 
 boolean doIt = A
 IF NOT doIt THEN
@@ -320,7 +334,8 @@ END IF
 IF doIt THEN
    // do it!
 END IF
-// Of course, the name of your boolean var should not be doIt - it must clearly describe the action which will be performed under the overall condition.
+
 // When returning a boolean value from a function, make its last lines like these:
+
 IF A THEN RETURN TRUE
 RETURN B
