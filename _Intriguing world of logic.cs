@@ -260,14 +260,14 @@ boolean resultY = (localVar1 + localVar2) || this.aBooleanMethodWhichCallsWebSer
 
 // This increases the chances of skipping the more expensive evaluation of B.
 
-// ------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Now let's look at how short-circuit evaluation is used in different programming languages.
-// ------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-// It's supported in most C-like syntax languages (C#, Java, Kotlin, Scala, JavaScript, TypeScript) using the standard && and || operators.
+// It's supported in most C-like syntax languages (C#, JavaScript, TypeScript, Java, Kotlin, Scala) using the standard && and || operators.
 // To avoid short-circuit evaluation in these languages, use bitwise operators & and | instead of && and ||.
 
-// In Visual Basic.NET, short-circuit evaluation is supported, but only with specific operators AndAlso (instead of And) and OrElse (instead of Or):
+// In Visual Basic.NET, short-circuit evaluation is supported, but only with specific operators AndAlso (replaces And) and OrElse (replaces Or):
 If obj IsNot Nothing AndAlso obj.IsValid() Then ' protect against NullReferenceException
     Console.WriteLine("Condition is true")
 End If
@@ -276,7 +276,7 @@ If age >= 18 OrElse ExpensiveCheck() Then
 End If
 // To avoid short-circuiting, use the standard And and Or operators.
 
-// In Oracle PL/SQL, short-circuit evaluation is supported, but only with specific operators AND THEN (instead of AND) and OR ELSE (instead of OR):
+// In Oracle PL/SQL, short-circuit evaluation is supported, but only with specific operators AND THEN (replaces AND) and OR ELSE (replaces OR):
 IF v_coef <> 0 AND THEN (v_var / v_coef) > .2 THEN -- protect against ZERO_DIVIDE
    process(item_id);
 END IF;
@@ -285,18 +285,42 @@ IF item_in_stock(item_id) OR ELSE is_backorder_allowed(item_id) THEN -- is_backo
 END IF;
 // To avoid short-circuiting, use the standard AND and OR operators.
 
-// In T-SQL (Transact-SQL), short-circuit evaluation may occur with AND and OR, but it is not guaranteed or formally defined by the SQL Server and Sybase specification.
+// In T-SQL (Transact-SQL), short-circuit evaluation may occur, but it is not guaranteed or formally defined by the SQL Server and Sybase specification.
 // This means that while T-SQL often skips evaluation of the second condition when the result is already determined, developers should not rely on this behavior.
 // All expressions should be written assuming that every part will be evaluated, especially when using conditions that involve function calls, subqueries, or potential side effects.
 
 // In PowerScript, the language used in PowerBuilder, short-circuit evaluation is not supported.
 
-// You can easily check whether your language supports SCE by assigning a Boolean variable the result of an expression where the second part contains a division by zero (translate the expression to your language if needed):
+// You can easily check whether your programming language supports SCE by assigning a Boolean variable the result of an expression where the second part contains a division by zero.
+// Translate the next expression to your language and execute:
 boolean sceSuported = ((1 = 2) AND (1 = (1 / 0)))
-// If you don't get the zero divide error then SCE is supported.
-// Otherwise, you should manually control the evaluation order to prevent issues. For example, the short-circuit "A AND B" expression can be mimicked this way:
+// If you DON'T get the zero divide error then you are good to go - short-circuiting is there.
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// How to implement short-circuiting if your language doesn't support short-circuit evaluation
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// Mimic short-circuit "A AND B":
+
 IF A THEN
    IF B THEN
-      // ...
+      // do it!
    END IF
 END IF
+// When returning a boolean value from a function, make its last lines like these:
+IF NOT A THEN RETURN FALSE
+RETURN B
+
+// Mimic short-circuit "A OR B":
+
+boolean doIt = A
+IF NOT doIt THEN
+   doIt = B
+END IF
+IF doIt THEN
+   // do it!
+END IF
+// Of course, the name of your boolean var should not be doIt - it must clearly describe the action which will be performed under the overall condition.
+// When returning a boolean value from a function, make its last lines like these:
+IF A THEN RETURN TRUE
+RETURN B
